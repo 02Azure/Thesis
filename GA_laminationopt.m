@@ -1,6 +1,6 @@
 clc
 clear
-global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f
+global Nx h_web t_ply U XiDopt maxtweb b a f
 
     Nx = 500; %Critical Buckling Compression load Constraint, N/mm
 
@@ -9,7 +9,6 @@ global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f
     b = 170; %lebar pelat skin, mm
     f = 80; %lebar total flange, mm
     h_web = 50; %tinggi web stiffener, mm
-    maxtskin = 7; %tebal skin maksimum yang diperbolehkan, mm
     maxtweb = 7; %tebal web maksimum yang diperbolehkan
 
     %Input Properti Material
@@ -47,7 +46,6 @@ B = [1;1;1;1;1;1;1;1];
 Aeq = []; beq = [];
 LB = [ -1 -1 -1 -1 -1 -1 ];
 UB = [ 1 1 1 1 1 1];
-lamparaflag = 1;
 nvars = 6;
 
 options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
@@ -60,7 +58,7 @@ eigen_val = (rounda(fval)-fval)*10;
 
 clear x A b Aeq beq LB UB
 
-%GA Most fit Stacking sequence search - skin-------------------------------
+%GA Most fit Stacking sequence search - skin and web-------------------------
 options = optimoptions('ga','PlotFcn', @gaplotbestf);
 ObjectiveFunction = @seqsearch;
 nvars = ceil(total_plyskin/2)+1;
@@ -83,7 +81,6 @@ Intcon = 1:nvars;
 error = 1;
 n = 1;
 max = 15;
-point = 1;
 
 while error > 0.00001 && n ~= max                    
     [x,fval,output] = ga(ObjectiveFunction,...
