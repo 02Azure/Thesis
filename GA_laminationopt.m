@@ -1,12 +1,13 @@
 clc
 clear
-global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point
+global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f eigval_skin eigval_web
 
     Nx = 500; %Critical Buckling Compression load Constraint, N/mm
 
     %Geometri Pelat
     a = 300; %panjang pelat, mm
     b = 170; %lebar pelat skin, mm
+    f = 80; %lebar total flange, mm
     h_web = 50; %tinggi web stiffener, mm
     maxtskin = 7; %tebal skin maksimum yang diperbolehkan, mm
     maxtweb = 5; %tebal web maksimum yang diperbolehkan
@@ -31,67 +32,31 @@ global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point
             1/8 1/8 -1/4 1/2 ];
     U = inva*Q;
 
-%GA lamination optimum parameter search - Skin-----------------------------
-ObjectiveFunction = @SSSS_flexuralaniso;
-X0 = [0 -1 0]; %gene awal - opsional
-A = [2,-1,0;0,1,2;-2,-1,0;0,1,-2];
-B = [1;1;1;1];
+%GA lamination optimum parameter search - Stiffener+Skin----------------------
+ObjectiveFunction = @lampara_opt;
+X0 = [0 -1 0 0 -1 0]; %gene awal - opsional
+A = [2,-1,0,0,0,0; %kiri ke kanan: Xi_D skin 123, Xi_D stiffener 123
+     0,1,2,0,0,0;
+     -2,-1,0,0,0,0;
+     0,1,-2,0,0,0;
+     0,0,0,2,-1,0;
+     0,0,0,0,1,2;
+     0,0,0,-2,-1,0;
+     0,0,0,0,1,-2];
+B = [1;1;1;1;1;1;1;1];
 Aeq = []; beq = [];
-LB = [ -1 -1 -1 ];
-UB = [ 1 1 1 ];
+LB = [ -1 -1 -1 -1 -1 -1 ];
+UB = [ 1 1 1 1 1 1];
 lamparaflag = 1;
-nvars = 3;
-
-% no flexural aniso form
-% ObjectiveFunction = @SSSS_noflex;
-% X0 = [0 -1];
-% A = [2,-1;-2,-1];
-% B = [1;1];
-% Aeq = []; beq = [];
-% LB = [ -1 -1 ];
-% UB = [ 1 1 ];
-% lamparaflag = 2; %flag for: ignoring flexural anisotropy, considered lamination
-%                  %parameter: XiD 1 2, constraint: axial buckling
-% nvars = 2;
+nvars = 6;
 
 options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
 [x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
                                       
-    
-eigval_skin = ((round(fval)-fval)*10)+1 %eigenvalue
-XiDopt(1,:) = x;
+XiDopt(1,:) = x(1:3); %Xi_skin
+XiDopt(2,:) = x(4:6); %Xi_web
 total_plyskin = round(fval);
 clear x A b Aeq beq LB UB
-
-%GA lamination optimum parameter search - Web------------------------------
-ObjectiveFunction = @SSSF_flexuralaniso;
-X0 = [0 -1 0];
-A = [2,-1,0;0,1,2;-2,-1,0;0,1,-2];
-B = [1;1;1;1];
-Aeq = []; beq = [];
-LB = [ -1 -1 -1 ];
-UB = [ 1 1 1 ];
-lamparaflag = 1;
-nvars = 3;
-
-% no flexural aniso form
-% ObjectiveFunction = @SSSS_noflex;
-% X0 = [0 -1];
-% A = [2,-1;-2,-1];
-% B = [1;1];
-% Aeq = []; beq = [];
-% LB = [ -1 -1 ];
-% UB = [ 1 1 ];
-% lamparaflag = 2; %flag for: ignoring flexural anisotropy, considered lamination
-%                  %parameter: XiD 1 2, constraint: axial buckling
-% nvars = 2;
-
-[x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
-                                      
-    
-eigval_web = ((round(fval)-fval)*10)+1 %eigenvalue
-total_plyweb = round(fval);
-XiDopt(2,:) = x;
 
 %GA Most fit Stacking sequence search - skin-------------------------------
 options = optimoptions('ga','PlotFcn', @gaplotbestf);
@@ -146,52 +111,6 @@ end
     end
  end
  clear LB UB
- %GA Most fit Stacking sequence search - web-------------------------------
-nvars = ceil(total_plyweb/2)+1;
-
-if mod(total_plyweb,2) == 1
-   LB(1:nvars) = 1; %mid symteric
-   UB(1:nvars-1) = 4;
-   UB(nvars) = 1;
-else
-   LB(1:nvars-1) = 1;
-   LB(nvars) = 0; %symetric
-   UB(1:nvars-1) = 4;
-   UB(nvars) = 0;
-end
-
-Intcon = 1:nvars;
-error = 1;
-n = 1;
-point = 2;
-
-while error > 0.00001 && n ~= max                    
-    [x,fval,output] = ga(ObjectiveFunction,...
-                             nvars,A,B,Aeq,beq,LB,UB,[],Intcon,options);
-   
-    n = n+1;
-    if fval <= error 
-       clear seq_web
-       seq_web = x;
-    end
-    error = fval;
-end
-
-%Convert to degree
- for n = 1:length(seq_web)-1
-    if  seq_web(n) == 1
-        seq_web(n) = 0;
-    end
-    if  seq_web(n) == 2
-        seq_web(n) = 45;
-    end
-    if  seq_web(n) == 3
-        seq_web(n) = -45;
-    end
-    if  seq_web(n) == 4
-        seq_web(n) = 90;
-    end
- end
  
  clc
  disp('Optimization Finished')
@@ -210,7 +129,7 @@ end
  eigval_skin
  
  disp(' ')
- disp('Most optimum stacking sequence for web:')
+ disp('Most optimum stacking sequence for web:') %to be edited
  disp(seq_web(1:end-1))
  
  if(seq_web(end)==0)
