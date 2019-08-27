@@ -54,7 +54,7 @@ options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
 XiDopt(1,:) = x(1:3); %Xi_skin
 XiDopt(2,:) = x(4:6); %Xi_web
 total_plyskin = round(fval)/2; 
-eigen_val = (rounda(fval)-fval)*10;
+eigen_val = (round(fval)-fval)*10;
 
 clear x A b Aeq beq LB UB
 
