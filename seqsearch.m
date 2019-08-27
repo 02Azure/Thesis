@@ -35,7 +35,7 @@ end
 
 Xi_D(1:3) = 0;
 
-%pendefinisian nilai z
+%pendefinisian nilai z, skin
 z(1:layernum+1) = 0;
 z(1) = -0.5*t_ply*layernum;
 
@@ -43,7 +43,7 @@ for n = 2:layernum+1
     z(n) = z(n-1)+t_ply;
 end
 
-%perhitungan lamination parameters
+%perhitungan lamination parameters, skin
 norm_z = 2*z'/(layernum*t_ply);
 Xi_D(1:3) = 0;
 
@@ -59,3 +59,6 @@ else
     y = sum((XiDopt(point,:)-Xi_D).^2);
 end
 
+%sequence web
+%pendefinisian nilai z, web
+%perhitungan lamination parameters, web
