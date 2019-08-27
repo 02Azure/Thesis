@@ -60,5 +60,6 @@ for n = t_ply*6:t_ply:maxtweb %n = tebal ply web
       RFw = 1-(Pcrw/Nx);
       break
    end
+end
 
 y = (n/t_ply)+((RFs+RFw)/20);
