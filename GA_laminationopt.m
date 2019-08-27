@@ -1,6 +1,6 @@
 clc
 clear
-global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f eigval_skin eigval_web
+global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f
 
     Nx = 500; %Critical Buckling Compression load Constraint, N/mm
 
@@ -10,7 +10,7 @@ global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f eigval_s
     f = 80; %lebar total flange, mm
     h_web = 50; %tinggi web stiffener, mm
     maxtskin = 7; %tebal skin maksimum yang diperbolehkan, mm
-    maxtweb = 5; %tebal web maksimum yang diperbolehkan
+    maxtweb = 7; %tebal web maksimum yang diperbolehkan
 
     %Input Properti Material
     E11 = 135000; %MPa
@@ -33,7 +33,7 @@ global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point f eigval_s
     U = inva*Q;
 
 %GA lamination optimum parameter search - Stiffener+Skin----------------------
-ObjectiveFunction = @lampara_opt;
+ObjectiveFunction = @Lamination_ParaSearch;
 X0 = [0 -1 0 0 -1 0]; %gene awal - opsional
 A = [2,-1,0,0,0,0; %kiri ke kanan: Xi_D skin 123, Xi_D stiffener 123
      0,1,2,0,0,0;
@@ -55,7 +55,9 @@ options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
                                       
 XiDopt(1,:) = x(1:3); %Xi_skin
 XiDopt(2,:) = x(4:6); %Xi_web
-total_plyskin = round(fval);
+total_plyskin = round(fval)/2; 
+eigen_val = (rounda(fval)-fval)*10;
+
 clear x A b Aeq beq LB UB
 
 %GA Most fit Stacking sequence search - skin-------------------------------
