@@ -125,19 +125,5 @@ end
     disp('Total number of layers:')
     disp(((length(seq_skin)-2)*2)+1)
  end
- eigval_skin
+ eig_val
  
- disp(' ')
- disp('Most optimum stacking sequence for web:') %to be edited
- disp(seq_web(1:end-1))
- 
- if(seq_web(end)==0)
-    disp('Symmetric')
-    disp('Total number of layers:')
-    disp((length(seq_web)-1)*2)
- else
-    disp('Mid-plane Symmetric')
-    disp('Total number of layers:')
-    disp(((length(seq_web)-2)*2)+1)
- end
- eigval_web
