@@ -33,27 +33,20 @@ global Nx h_web t_ply U XiDopt maxtweb b a f
 
 %GA lamination optimum parameter search - Stiffener+Skin----------------------
 ObjectiveFunction = @Lamination_ParaSearch;
-X0 = [0 -1 0 0 -1 0]; %gene awal - opsional
-A = [2,-1,0,0,0,0; %kiri ke kanan: Xi_D skin 123, Xi_D stiffener 123
-     0,1,2,0,0,0;
-     -2,-1,0,0,0,0;
-     0,1,-2,0,0,0;
-     0,0,0,2,-1,0;
-     0,0,0,0,1,2;
-     0,0,0,-2,-1,0;
-     0,0,0,0,1,-2];
-B = [1;1;1;1;1;1;1;1];
+X0 = [0 -1 0]; %gene awal - opsional
+A = [2,-1,0;0,1,2;-2,-1,0;0,1,-2];
+B = [1;1;1;1];
 Aeq = []; beq = [];
-LB = [ -1 -1 -1 -1 -1 -1 ];
-UB = [ 1 1 1 1 1 1];
-nvars = 6;
+LB = [ -1 -1 -1 ];
+UB = [ 1 1 1 ];
+lamparaflag = 1;
+nvars = 3;
 
 options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
 [x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
                                       
-XiDopt(1,:) = x(1:3); %Xi_skin
-XiDopt(2,:) = x(4:6); %Xi_web
-total_plyskin = round(fval)/2; 
+XiDopt = x;
+total_plyskin = round(fval); 
 eigen_val = (round(fval)-fval)*10;
 
 clear x A b Aeq beq LB UB
@@ -113,7 +106,7 @@ end
  
  clc
  disp('Optimization Finished')
- disp('most optimum stacking sequence for skin:')
+ disp('most optimum stacking sequence:')
  disp(seq_skin(1:end-1))
  
  if(seq_skin(end)==0)
