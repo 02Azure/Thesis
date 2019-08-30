@@ -7,4 +7,5 @@ Asumsi:
 
 -pengaruh flange dihitung dengan: D skin with flange = X% Dskin + Y% Dflange
 
-Target Done: None yet
+Target Done
+Result : tidak reliable
