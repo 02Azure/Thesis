@@ -21,7 +21,7 @@ XiDw = [1 Xi(4) Xi(5) 0 0;...
        0 0.5*Xi(6) 0 0 0];    
    
 Dw = XiDw*U; %excluding h^3/12, matriks D web
-Ds = (f/b)*XiDw*U + (1/8)*((b-f)/b)*XiDs*U; %excluding h^3/12, matriks D skin-flange: avg
+Ds = (1-cosd(pi*f/b))*XiDw*U + (1/8)*(cos(pi*f/b))*XiDs*U; %excluding h^3/12, matriks D skin-flange: avg
 %----- to be edited: D skin-flange --> X% skin + Y% flange
 % (D(1,1)) -> D(1)
 % (D(2,2)) -> D(2)
