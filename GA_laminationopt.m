@@ -7,7 +7,7 @@ global Nx h_web t_ply U XiDopt maxtweb b a f
     %Geometri Pelat
     a = 300; %panjang pelat, mm
     b = 170; %lebar pelat skin, mm
-    f = 80; %lebar total flange, mm
+    f = 40; %lebar setengah  total flange, mm
     h_web = 50; %tinggi web stiffener, mm
     maxtweb = 7; %tebal web maksimum yang diperbolehkan
 
