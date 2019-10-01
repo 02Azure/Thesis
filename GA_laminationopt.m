@@ -1,15 +1,15 @@
 clc
 clear
-global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point
+global Nx h_web t_ply U XiDopt XiAopt maxtweb b a f flag total_plyweb
 
     Nx = 500; %Critical Buckling Compression load Constraint, N/mm
 
     %Geometri Pelat
     a = 300; %panjang pelat, mm
     b = 170; %lebar pelat skin, mm
+    f = 40; %lebar setengah  total flange, mm
     h_web = 50; %tinggi web stiffener, mm
-    maxtskin = 7; %tebal skin maksimum yang diperbolehkan, mm
-    maxtweb = 5; %tebal web maksimum yang diperbolehkan
+    maxtweb = 7; %tebal web maksimum yang diperbolehkan
 
     %Input Properti Material
     E11 = 135000; %MPa
@@ -30,39 +30,7 @@ global Nx h_web t_ply U XiDopt lamparaflag maxtskin maxtweb b a point
             1/8 1/8 3/4 -1/2;... 
             1/8 1/8 -1/4 1/2 ];
     U = inva*Q;
-
-%GA lamination optimum parameter search - Skin-----------------------------
-ObjectiveFunction = @SSSS_flexuralaniso;
-X0 = [0 -1 0]; %gene awal - opsional
-A = [2,-1,0;0,1,2;-2,-1,0;0,1,-2];
-B = [1;1;1;1];
-Aeq = []; beq = [];
-LB = [ -1 -1 -1 ];
-UB = [ 1 1 1 ];
-lamparaflag = 1;
-nvars = 3;
-
-% no flexural aniso form
-% ObjectiveFunction = @SSSS_noflex;
-% X0 = [0 -1];
-% A = [2,-1;-2,-1];
-% B = [1;1];
-% Aeq = []; beq = [];
-% LB = [ -1 -1 ];
-% UB = [ 1 1 ];
-% lamparaflag = 2; %flag for: ignoring flexural anisotropy, considered lamination
-%                  %parameter: XiD 1 2, constraint: axial buckling
-% nvars = 2;
-
-options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
-[x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
-                                      
     
-eigval_skin = ((round(fval)-fval)*10)+1 %eigenvalue
-XiDopt(1,:) = x;
-total_plyskin = round(fval);
-clear x A b Aeq beq LB UB
-
 %GA lamination optimum parameter search - Web------------------------------
 ObjectiveFunction = @SSSF_flexuralaniso;
 X0 = [0 -1 0];
@@ -71,35 +39,63 @@ B = [1;1;1;1];
 Aeq = []; beq = [];
 LB = [ -1 -1 -1 ];
 UB = [ 1 1 1 ];
-lamparaflag = 1;
 nvars = 3;
-
-% no flexural aniso form
-% ObjectiveFunction = @SSSS_noflex;
-% X0 = [0 -1];
-% A = [2,-1;-2,-1];
-% B = [1;1];
-% Aeq = []; beq = [];
-% LB = [ -1 -1 ];
-% UB = [ 1 1 ];
-% lamparaflag = 2; %flag for: ignoring flexural anisotropy, considered lamination
-%                  %parameter: XiD 1 2, constraint: axial buckling
-% nvars = 2;
-
-[x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
-                                      
-    
-eigval_web = ((round(fval)-fval)*10)+1 %eigenvalue
+options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
+[x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options) 
 total_plyweb = round(fval);
-XiDopt(2,:) = x;
+eigval_web = ((round(fval)-fval)*10)+1;
+XiDopt(1,:) = x; %XiD optimal untuk web
 
-%GA Most fit Stacking sequence search - skin-------------------------------
+
+
+%GA lamination optimum parameter search - Skin+flange----------------------
+ObjectiveFunction = @SSSS_skinflange;
+X0 = [0 -1 0 0 -1 0 0 -1 0 0 -1 0]; %gene awal - opsional
+%kiri ke kanan: Xi_D skin 123, Xi_D flange 123, Xi_A skin 123, Xi_A flange 123
+A = [2,-1,0,0,0,0,0,0,0,0,0,0; 
+     0,1,2,0,0,0,0,0,0,0,0,0;
+     -2,-1,0,0,0,0,0,0,0,0,0,0;
+     0,1,-2,0,0,0,0,0,0,0,0,0;
+     0,0,0,2,-1,0,0,0,0,0,0,0;
+     0,0,0,0,1,2,0,0,0,0,0,0;
+     0,0,0,-2,-1,0,0,0,0,0,0,0;
+     0,0,0,0,1,-2,0,0,0,0,0,0;
+     0,0,0,0,0,0,2,-1,0,0,0,0;
+     0,0,0,0,0,0,0,1,2,0,0,0;
+     0,0,0,0,0,0,-2,-1,0,0,0,0;
+     0,0,0,0,0,0, 0,1,-2,0,0,0;
+     0,0,0,0,0,0,0,0,0,2,-1,0;
+     0,0,0,0,0,0,0,0,0,0,1,2;
+     0,0,0,0,0,0,0,0,0,-2,-1,0;
+     0,0,0,0,0,0,0,0,0,0,1,-2];
+B = [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1];
+Aeq = []; beq = [];
+LB = [ -1 -1 0 -1 -1 0 -1 -1 -1 -1 -1 -1 ];
+UB = [ 1 1 0 1 1 0 1 1 1 1 1 1];
+nvars = 12;
+
+options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
+[x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
+%                                       
+XiDopt(2,:) = x(1:3); %XiD_optimalskin
+XiDopt(3,:) = x(4:6); %XiD_optimalflange
+XiAopt(1,:) = x(7:9); %XiA_optimalskin
+XiAopt(2,:) = x(10:12); %XiA_optimalflange
+
+
+total_plyskin = round(fval); 
+eigval_skin = ((round(fval)-fval)*10)+1;
+% 
+clear x A b Aeq beq LB UB
+
+% GA Most fit Stacking sequence search - skin-------------------------
 options = optimoptions('ga','PlotFcn', @gaplotbestf);
 ObjectiveFunction = @seqsearch;
 nvars = ceil(total_plyskin/2)+1;
 A = [];
 B = [];
 Aeq = []; beq = [];
+flag = 1;
 
 if mod(total_plyskin,2) == 1
    LB(1:nvars) = 1; %mid symteric
@@ -116,7 +112,6 @@ Intcon = 1:nvars;
 error = 1;
 n = 1;
 max = 15;
-point = 1;
 
 while error > 0.00001 && n ~= max                    
     [x,fval,output] = ga(ObjectiveFunction,...
@@ -145,11 +140,14 @@ end
         seq_skin(n) = 90;
     end
  end
- clear LB UB
- %GA Most fit Stacking sequence search - web-------------------------------
-nvars = ceil(total_plyweb/2)+1;
+ clear LB UB Intcon
 
-if mod(total_plyweb,2) == 1
+
+%GA Most fit Stacking sequence search - web-------------------------
+nvars = ceil(total_plyweb/4)+1;
+flag = 2;
+
+if mod(total_plyweb/2,2) == 1
    LB(1:nvars) = 1; %mid symteric
    UB(1:nvars-1) = 4;
    UB(nvars) = 1;
@@ -163,7 +161,6 @@ end
 Intcon = 1:nvars;
 error = 1;
 n = 1;
-point = 2;
 
 while error > 0.00001 && n ~= max                    
     [x,fval,output] = ga(ObjectiveFunction,...
@@ -178,7 +175,7 @@ while error > 0.00001 && n ~= max
 end
 
 %Convert to degree
- for n = 1:length(seq_web)-1
+for n = 1:length(seq_web)-1
     if  seq_web(n) == 1
         seq_web(n) = 0;
     end
@@ -191,8 +188,8 @@ end
     if  seq_web(n) == 4
         seq_web(n) = 90;
     end
- end
- 
+end
+seq_web(n+1:n*2) = seq_web(1:n);
  clc
  disp('Optimization Finished')
  disp('most optimum stacking sequence for skin:')
@@ -200,26 +197,21 @@ end
  
  if(seq_skin(end)==0)
     disp('Symmetric')
-    disp('Total number of layers:')
-    disp((length(seq_skin)-1)*2)
  else
     disp('Mid-plane Symmetric')
-    disp('Total number of layers:')
-    disp(((length(seq_skin)-2)*2)+1)
  end
+ disp('Total number of layers:')
+ disp(total_plyskin)
  eigval_skin
  
- disp(' ')
- disp('Most optimum stacking sequence for web:')
- disp(seq_web(1:end-1))
+disp('most optimum stacking sequence for web:')
+ disp(seq_web)
  
- if(seq_web(end)==0)
+ if(mod(total_plyweb,2)==0)
     disp('Symmetric')
-    disp('Total number of layers:')
-    disp((length(seq_web)-1)*2)
  else
     disp('Mid-plane Symmetric')
-    disp('Total number of layers:')
-    disp(((length(seq_web)-2)*2)+1)
  end
+ disp('Total number of layers:')
+ disp(total_plyweb)
  eigval_web
