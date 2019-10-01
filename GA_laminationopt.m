@@ -189,7 +189,16 @@ for n = 1:length(seq_web)-1
         seq_web(n) = 90;
     end
 end
-seq_web(n+1:n*2) = seq_web(1:n);
+
+layernum = 2*(length(seq_web)-1)-seq_web(length(seq_web));
+halflayer = ceil(layernum/2);
+
+m = 1;
+for n = layernum:-1:halflayer+1
+    seq_web(n) = seq_web(m);
+    m = m+1;
+end
+
  clc
  disp('Optimization Finished')
  disp('most optimum stacking sequence for skin:')
