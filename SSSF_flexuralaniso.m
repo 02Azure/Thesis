@@ -1,6 +1,6 @@
 function y = SSSF_flexuralaniso(Xi)
 global U h_web t_ply Nx maxtweb
-%SSSS Boundary, Long Flexural Anisotropic Plate, 0 +-45 90 layer only
+%SSSF Boundary, Long Flexural Anisotropic Plate, 0 +-45 90 layer only
 %matriks Xi
 XiD = [1 Xi(1) Xi(2) 0 0;...
        1 -Xi(1) Xi(2) 0 0;...
@@ -20,7 +20,7 @@ D = XiD*U; %excluding h^3/12
 Pcr1 = (12/h_web^2)*(D(4)-((D(6)^2)/D(2)));
 Pcr2 = (1/h_web^2) *(12*D(4)-10*((D(5)^2)/(D(1))));
 
-for n = t_ply*6:t_ply:maxtweb
+for n = t_ply*6:2*t_ply:maxtweb
       if(Pcr1*((n^3)/12)>=Nx && Pcr2*((n^3)/12)>=Nx ||n==maxtweb)
          Nxcr(1) = Pcr1*((n^3)/12);
          Nxcr(2) = Pcr2*((n^3)/12);
