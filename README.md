@@ -2,7 +2,8 @@
 Optimasi Stacking Sequence pada Blade Stiffener
 
 
-Base Script
-
+v1.00: sudah di validasi
 - pertimbangan flange sudah dimasukkan 
+- susunan parameter lamina dibatasi simetrik, balanced, dan ortotropik
+- namun susunan sesungguhnya bisa saja ortotropik.
 
