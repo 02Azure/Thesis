@@ -1,7 +1,6 @@
 function y = seqsearch(seq)
 global t_ply XiAopt XiDopt flag
 %flag 1 = untuk skin, flag 2 = untuk web
-%--> 24 ply symmetric (0 0 0 90 90 90 45 -45 45 -45 45 -45);
 layernum = 2*(length(seq)-1)-seq(length(seq));
 halflayer = ceil(layernum/2);
 
