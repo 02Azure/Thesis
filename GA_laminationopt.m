@@ -1,9 +1,10 @@
 clc
 clear
-global Nx h_web t_ply U XiDopt XiAopt maxtweb b a f flag total_plyweb
+global Nx h_web t_ply U XiDopt XiAopt maxtweb b a f flag total_plyweb term
 
     Nx = 500; %Critical Buckling Compression load Constraint, N/mm
-
+    term = 5; %Jumlah term pada estimasi metode RR
+    
     %Geometri Pelat
     a = 300; %panjang pelat, mm
     b = 170; %lebar pelat skin, mm
@@ -47,7 +48,6 @@ eigval_web = ((round(fval)-fval)*10)+1;
 XiDopt(1,:) = x; %XiD optimal untuk web
 
 
-
 %GA lamination optimum parameter search - Skin+flange----------------------
 ObjectiveFunction = @SSSS_skinflange;
 X0 = [0 -1 0 0 -1 0 0 -1 0 0 -1 0]; %gene awal - opsional
@@ -70,13 +70,13 @@ A = [2,-1,0,0,0,0,0,0,0,0,0,0;
      0,0,0,0,0,0,0,0,0,0,1,-2];
 B = [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1];
 Aeq = []; beq = [];
-LB = [ -1 -1 0 -1 -1 0 -1 -1 -1 -1 -1 -1 ];
-UB = [ 1 1 0 1 1 0 1 1 1 1 1 1];
+LB = [ -1 -1 0 -1 -1 0 -1 -1 0 -1 -1 0 ]; %Xi_D 3 dibatasi hanya bernilai 0 ( kondisi ortotropik )
+UB = [ 1 1 0 1 1 0 1 1 0 1 1 0];          %Xi_A 3 dibatasi hanya bernilai 0 ( kondisi susunan balanced )
 nvars = 12;
 
 options = optimoptions('ga','PlotFcn', @gaplotbestf,'InitialPopulation',X0);
 [x,fval] = ga(ObjectiveFunction,nvars,A,B,Aeq,beq,LB,UB,[],[],options)                                       
-%                                       
+                                       
 XiDopt(2,:) = x(1:3); %XiD_optimalskin
 XiDopt(3,:) = x(4:6); %XiD_optimalflange
 XiAopt(1,:) = x(7:9); %XiA_optimalskin
@@ -85,7 +85,6 @@ XiAopt(2,:) = x(10:12); %XiA_optimalflange
 
 total_plyskin = round(fval); 
 eigval_skin = ((round(fval)-fval)*10)+1;
-% 
 clear x A b Aeq beq LB UB
 
 % GA Most fit Stacking sequence search - skin-------------------------
@@ -111,7 +110,7 @@ end
 Intcon = 1:nvars;
 error = 1;
 n = 1;
-max = 15;
+max = 10;
 
 while error > 0.00001 && n ~= max                    
     [x,fval,output] = ga(ObjectiveFunction,...
@@ -199,7 +198,7 @@ for n = layernum:-1:halflayer+1
     m = m+1;
 end
 
- clc
+clc
  disp('Optimization Finished')
  disp('most optimum stacking sequence for skin:')
  disp(seq_skin(1:end-1))
