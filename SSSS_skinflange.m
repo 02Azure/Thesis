@@ -1,5 +1,5 @@
 function y = SSSS_skinflange(Xi)
-global U a b f t_ply Nx maxtweb total_plyweb
+global U a b f t_ply Nx maxtweb total_plyweb term
 
 %SSSS Boundary, 0 +-45 90 layer only
 %Matriks Xi D 
@@ -70,7 +70,6 @@ for h = 12*t_ply:t_ply:maxtweb
    Dsf(6) = Dsmea(2,3);
    Dsf = Dsf';
 
-   term = 7;
    m = term;
    n = m;
    baris = 1;
@@ -127,4 +126,3 @@ for h = 12*t_ply:t_ply:maxtweb
 end
 
 y = (h/t_ply)+(RF/10);
-%yang beda --> i =k, j=l, fun_sf2
