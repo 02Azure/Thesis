@@ -1,9 +1,8 @@
 # Thesis
-Optimasi Stacking Sequence pada Blade Stiffener
+Optimasi Stacking Sequence pada struktur stiffened panel
 
+- hanya beban Nx
+- Constraint buckling load
+- web dengan metode solusi CF, skin dgn pengaruh flange dengan metode RR
 
-v1.00: sudah di validasi
-- pertimbangan flange sudah dimasukkan 
-- susunan parameter lamina dibatasi simetrik, balanced, dan ortotropik
-- namun susunan sesungguhnya bisa saja ortotropik.
-
+v1.00 + strength constraint testing
