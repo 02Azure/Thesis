@@ -1,9 +1,10 @@
 # Thesis
-Optimasi Stacking Sequence pada Blade Stiffener
+Optimasi Stacking Sequence pada struktur Stiffened panel 
 
 
 v1.00: sudah di validasi
 - pertimbangan flange sudah dimasukkan 
 - susunan parameter lamina dibatasi simetrik, balanced, dan ortotropik
-- namun susunan sesungguhnya bisa saja ortotropik.
+- Hanya beban Nx
+- web dgn solusi CF, skin dgn metode RR
 
